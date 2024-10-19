@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if ! command -v jq >/dev/null 2>&1; then
-  ubuntu_version=$(lsb_release -rs)
-  if [[ $(echo "$ubuntu_version >= 22.04" | bc) -eq 1 ]]; then
+  version=$(grep '^VERSION_ID=' /etc/os-release | cut -d '"' -f 2)
+  if (($(echo "$version >= 22" | bc -l))); then
     wget -qO- https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo tee /etc/apt/keyrings/intel-sgx-keyring.asc >/dev/null
     echo "deb [signed-by=/etc/apt/keyrings/intel-sgx-keyring.asc arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/intel-sgx.list
   else
