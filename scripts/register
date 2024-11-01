@@ -25,9 +25,9 @@ if [[ -f "$priv_key_path" ]]; then
   docker compose down
   sudo mv "${priv_key_path}" "${priv_key_path}.${timestamp}"
   sudo mv "${bootstrap_path}" "${bootstrap_path}.${timestamp}"
-  sed -i "s/^SRN_INSTANCE_ID=/SRN_INSTANCE_ID=\n# ${timestamp} SRN_INSTANCE_ID=/g" ".env"
+  sed -i "s/^RAIKO_SN_INSTANCE_ID=/RAIKO_SN_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_INSTANCE_ID=/g" ".env"
 
-  if [[ "$SRN_RAIKO_IMAGE" == "raiko" ]]; then
+  if [[ "$RAIKO_SN_RAIKO_IMAGE" == "raiko" ]]; then
     ask "Do you want to rebuild images? [Y/N]" BUILD_AGAIN "N"
     if [ "$BUILD_AGAIN" != "N" ] && [ "$BUILD_AGAIN" != "n" ]; then
       docker compose build
@@ -54,13 +54,13 @@ if [[ -n $GAS_PRICE ]]; then
 fi
 
 declare -A L1_RPC_DEFAULTS
-L1_RPC_DEFAULTS["holesky"]=${SRN_HOLESKY_RPC:-"https://rpc.ankr.com/eth_holesky"}
-L1_RPC_DEFAULTS["ethereum"]=${SRN_ETHEREUM_RPC:-"https://rpc.ankr.com/eth"}
+L1_RPC_DEFAULTS["holesky"]=${RAIKO_SN_HOLESKY_RPC:-"https://ethereum-holesky.blockpi.network/v1/rpc/public"}
+L1_RPC_DEFAULTS["ethereum"]=${RAIKO_SN_ETHEREUM_RPC:-"https://ethereum.blockpi.network/v1/rpc/public"}
 
-if [[ -z $SRN_ETHEREUM_RPC && -z $SRN_HOLESKY_RPC ]]; then
-  ask "Provide L1 RPC url: " L1_RPC "${L1_RPC_DEFAULTS[${SRN_L1_NETWORK}]}"
+if [[ -z $RAIKO_SN_ETHEREUM_RPC && -z $RAIKO_SN_HOLESKY_RPC ]]; then
+  ask "Provide L1 RPC url: " L1_RPC "${L1_RPC_DEFAULTS[${RAIKO_SN_L1_NETWORK}]}"
 else
-  L1_RPC=${L1_RPC_DEFAULTS[${SRN_L1_NETWORK}]}
+  L1_RPC=${L1_RPC_DEFAULTS[${RAIKO_SN_L1_NETWORK}]}
 fi
 
 mono_deps_path="$workdir/.mono-deps"
@@ -73,7 +73,7 @@ if [[ "$current_rev" != "$installed_rev" ]]; then
   echo "${current_rev}" >"$mono_deps_path"
 fi
 
-export SRN_L1_NETWORK
+export RAIKO_SN_L1_NETWORK
 export L1_RPC
 export PRIVATE_KEY
 export ETH_GAS_PRICE
@@ -88,21 +88,21 @@ cd "$workdir"
 SGX_INSTANCE_ID=$(node ./scripts/helpers/parse-forge-output.mjs "$workdir/data/logs/raiko/registration-$timestamp.log")
 if [[ -z $SGX_INSTANCE_ID ]]; then
   echo "🚫 Failed to register SGX instance"
-  echo "If it's wrong and registration was successful, you can add your instance ID to .env file manually (variable SRN_INSTANCE_ID) and start raiko by running 'docker compose up -d'"
+  echo "If it's wrong and registration was successful, you can add your instance ID to .env file manually (variable RAIKO_SN_INSTANCE_ID) and start raiko by running 'docker compose up -d'"
   echo "Registration logs are saved at: $workdir/data/logs/raiko/registration-$timestamp.log"
   docker compose down
   exit 1
 fi
 
-sed -i "s/^SRN_INSTANCE_ID=/SRN_INSTANCE_ID=$SGX_INSTANCE_ID/g" ".env"
+sed -i "s/^RAIKO_SN_INSTANCE_ID=/RAIKO_SN_INSTANCE_ID=$SGX_INSTANCE_ID/g" ".env"
 echo "✅ Registered SGX instance with ID: $SGX_INSTANCE_ID"
 
 docker compose down && docker compose up -d
 
 public_ip=$(curl -s ifconfig.me)
-echo && echo "🚀 raiko is running and accessible at: http://${public_ip}:${SRN_RAIKO_PORT:-8080}"
+echo && echo "🚀 raiko is running and accessible at: http://${public_ip}:${RAIKO_SN_RAIKO_PORT:-8080}"
 
 if [[ $COMPOSE_PROFILES == "metrics" ]]; then
-  echo "📊 Prometheus is running and accessible at: http://${public_ip}:${SRN_PROMETHEUS_PORT:-9090}"
-  echo "📈 Grafana is running and accessible at: http://${public_ip}:${SRN_GRAFANA_PORT:-3000}"
+  echo "📊 Prometheus is running and accessible at: http://${public_ip}:${RAIKO_SN_PROMETHEUS_PORT:-9090}"
+  echo "📈 Grafana is running and accessible at: http://${public_ip}:${RAIKO_SN_GRAFANA_PORT:-3000}"
 fi

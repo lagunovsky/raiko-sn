@@ -13,10 +13,10 @@ if [[ ! -f ".checked" ]]; then
   fi
 
   read_intel_api_key
-  ask "Specify the L2 network [taiko_a7, taiko_mainnet]:" SRN_NETWORK "taiko_mainnet"
+  ask "Specify the L2 network [taiko_a7, taiko_mainnet]:" RAIKO_SN_NETWORK "taiko_mainnet"
 
   export INTEL_API_KEY
-  export SRN_NETWORK
+  export RAIKO_SN_NETWORK
 
   node ./scripts/helpers/check-fmspc.mjs
   touch .checked

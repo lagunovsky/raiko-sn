@@ -20,39 +20,41 @@ if [[ ! -f ".env" ]]; then
     sed -i "s@$variable=@$variable=${!variable}@g" ".env"
   }
 
-  specify_env_variable "Specify the Raiko docker image name:" SRN_RAIKO_IMAGE "us-docker.pkg.dev/evmchain/images/raiko"
-  specify_env_variable "Specify the PCCS docker image name:" SRN_PCCS_IMAGE "us-docker.pkg.dev/evmchain/images/pccs"
-  specify_env_variable "Specify the images tag:" SRN_IMAGES_TAG "latest"
+  specify_env_variable "Specify the Raiko docker image name:" RAIKO_SN_RAIKO_IMAGE "us-docker.pkg.dev/evmchain/images/raiko"
+  specify_env_variable "Specify the Raiko docker image tag:" RAIKO_SN_RAIKO_IMAGE_TAG "latest"
+
+  specify_env_variable "Specify the PCCS docker image name:" RAIKO_SN_PCCS_IMAGE "us-docker.pkg.dev/evmchain/images/pccs"
+  specify_env_variable "Specify the PCCS docker image tag:" RAIKO_SN_PCCS_IMAGE_TAG "latest"
 
   ask "Do you want specify the network configuration? [Y/N]" SPECIFY_NETWORK "Y"
   if [ "$SPECIFY_NETWORK" != "N" ] && [ "$SPECIFY_NETWORK" != "n" ]; then
-    specify_env_variable "Specify the L1 network [holesky, ethereum]:" SRN_L1_NETWORK "holesky"
+    specify_env_variable "Specify the L1 network [holesky, ethereum]:" RAIKO_SN_L1_NETWORK "ethereum"
 
-    if [ "$SRN_L1_NETWORK" == "ethereum" ]; then
-      specify_env_variable "Specify the Ethereum RPC endpoint:" SRN_ETHEREUM_RPC
-      specify_env_variable "Specify the Ethereum Beacon RPC endpoint:" SRN_ETHEREUM_BEACON_RPC
-      SRN_NETWORK="taiko_mainnet"
+    if [ "$RAIKO_SN_L1_NETWORK" == "ethereum" ]; then
+      specify_env_variable "Specify the Ethereum RPC endpoint:" RAIKO_SN_ETHEREUM_RPC
+      specify_env_variable "Specify the Ethereum Beacon RPC endpoint:" RAIKO_SN_ETHEREUM_BEACON_RPC
+      RAIKO_SN_NETWORK="taiko_mainnet"
     else
-      specify_env_variable "Specify the Holesky RPC endpoint:" SRN_HOLESKY_RPC
-      specify_env_variable "Specify the Holesky Beacon RPC endpoint:" SRN_HOLESKY_BEACON_RPC
-      SRN_NETWORK="taiko_a7"
+      specify_env_variable "Specify the Holesky RPC endpoint:" RAIKO_SN_HOLESKY_RPC
+      specify_env_variable "Specify the Holesky Beacon RPC endpoint:" RAIKO_SN_HOLESKY_BEACON_RPC
+      RAIKO_SN_NETWORK="taiko_a7"
     fi
 
-    specify_env_variable "Specify the L2 network [taiko_a7, taiko_mainnet]:" SRN_NETWORK
-    if [ "$SRN_NETWORK" == "taiko_mainnet" ]; then
-      specify_env_variable "Specify the Taiko Mainnet RPC endpoint:" SRN_TAIKO_MAINNET_RPC
+    specify_env_variable "Specify the L2 network [taiko_a7, taiko_mainnet]:" RAIKO_SN_NETWORK
+    if [ "$RAIKO_SN_NETWORK" == "taiko_mainnet" ]; then
+      specify_env_variable "Specify the Taiko Mainnet RPC endpoint:" RAIKO_SN_TAIKO_MAINNET_RPC
     else
-      specify_env_variable "Specify the Taiko A7 RPC endpoint:" SRN_TAIKO_A7_RPC
+      specify_env_variable "Specify the Taiko A7 RPC endpoint:" RAIKO_SN_TAIKO_A7_RPC
     fi
   fi
 
-  specify_env_variable "Specify the raiko port:" SRN_RAIKO_PORT "8080"
+  specify_env_variable "Specify the raiko port:" RAIKO_SN_RAIKO_PORT "8080"
 
   ask "Do you want collect metrics? [Y/N]" COLLECT_METRICS "Y"
   if [ "$COLLECT_METRICS" != "N" ] && [ "$COLLECT_METRICS" != "n" ]; then
     sed -i "s@COMPOSE_PROFILES=@COMPOSE_PROFILES=metrics@g" ".env"
-    specify_env_variable "Specify the prometheus port:" SRN_PROMETHEUS_PORT "9090"
-    specify_env_variable "Specify the grafana port:" SRN_GRAFANA_PORT "3000"
+    specify_env_variable "Specify the prometheus port:" RAIKO_SN_PROMETHEUS_PORT "9090"
+    specify_env_variable "Specify the grafana port:" RAIKO_SN_GRAFANA_PORT "3000"
   fi
 else
   echo "Using existing .env file"
@@ -70,7 +72,7 @@ fi
 
 config_path="data/pccs/default.json"
 if [[ ! -f "$config_path" ]]; then
-  cp "src/raiko/docker/pccs-defaut-example.json" "${config_path}"
+  cp "src/raiko/docker/pccs-default-example.json" "${config_path}"
   chmod 644 "${config_path}"
 
   read_intel_api_key

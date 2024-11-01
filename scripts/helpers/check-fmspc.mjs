@@ -7,7 +7,7 @@ const FMSPCs = [
   '00906ED50000',
 ]
 
-if (process.env.SRN_NETWORK === 'taiko_a7') {
+if (process.env.RAIKO_SN_NETWORK === 'taiko_a7') {
   FMSPCs.push(
     '30606A000000',
     '00706A100000'

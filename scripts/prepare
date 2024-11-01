@@ -15,7 +15,7 @@ fi
 
 if ! command -v node >/dev/null 2>&1; then
   sleep 2
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
   sudo apt install nodejs -y
   sudo npm install -g pnpm
 fi

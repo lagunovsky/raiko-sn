@@ -1,20 +1,20 @@
 #!/bin/bash
 
-if [ "$SRN_L1_NETWORK" == "ethereum" ]; then
+if [ "$RAIKO_SN_L1_NETWORK" == "ethereum" ]; then
   export SGX_VERIFIER_ADDRESS=0xb0f3186FC1963f774f52ff455DC86aEdD0b31F81
   export ATTESTATION_ADDRESS=0x8d7C954960a36a7596d7eA4945dDf891967ca8A3
   export PEM_CERTCHAIN_ADDRESS=0x02772b7B3a5Bea0141C993Dbb8D0733C19F46169
   export TASK_ENABLE=0,0,0,0,0,1
 fi
 
-if [ "$SRN_L1_NETWORK" == "holesky" ]; then
+if [ "$RAIKO_SN_L1_NETWORK" == "holesky" ]; then
   export SGX_VERIFIER_ADDRESS=0x532EFBf6D62720D0B2a2Bb9d11066E8588cAE6D9
   export ATTESTATION_ADDRESS=0xC6cD3878Fc56F2b2BaB0769C580fc230A95e1398
   export PEM_CERTCHAIN_ADDRESS=0x08d7865e7F534d743Aba5874A9AD04bcB223a92E
   export TASK_ENABLE=0,0,0,0,0,1
 fi
 
-forge script script/SetDcapParams.s.sol:SetDcapParams \
+forge script script/layer1/SetDcapParams.s.sol:SetDcapParams \
   --fork-url "${L1_RPC}" \
   --broadcast \
   --evm-version cancun \

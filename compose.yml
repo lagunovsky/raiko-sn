@@ -3,7 +3,7 @@ services:
     build:
       context: src/raiko
       dockerfile: Dockerfile
-    image: ${SRN_RAIKO_IMAGE:-raiko}:${SRN_IMAGES_TAG:-latest}
+    image: ${RAIKO_SN_RAIKO_IMAGE:-raiko}:${RAIKO_SN_RAIKO_IMAGE_TAG:-latest}
     restart: unless-stopped
     command: --config-path=/etc/raiko/config.sgx.json --chain-spec-path=/etc/raiko/chain_spec_list.docker.json
     devices:
@@ -14,18 +14,19 @@ services:
       - ./data/gramine:/root/.config/gramine
       - ./data/raiko:/root/.config/raiko
     ports:
-      - "${SRN_RAIKO_PORT:-8080}:8080"
+      - "${RAIKO_SN_RAIKO_PORT:-8080}:8080"
     environment:
-      - SGX_DIRECT=${SRN_SGX_DIRECT:-0}
-      - SGX_INSTANCE_ID=${SRN_INSTANCE_ID:-}
-      - L1_NETWORK=${SRN_L1_NETWORK:-}
-      - NETWORK=${SRN_NETWORK:-}
-      - ETHEREUM_RPC=${SRN_ETHEREUM_RPC:-}
-      - ETHEREUM_BEACON_RPC=${SRN_ETHEREUM_BEACON_RPC:-}
-      - HOLESKY_RPC=${SRN_HOLESKY_RPC:-}
-      - HOLESKY_BEACON_RPC=${SRN_HOLESKY_BEACON_RPC:-}
-      - TAIKO_A7_RPC=${SRN_TAIKO_A7_RPC:-}
-      - TAIKO_MAINNET_RPC=${SRN_TAIKO_MAINNET_RPC:-}
+      - SGX=true
+      - SGX_DIRECT=${RAIKO_SN_SGX_DIRECT:-0}
+      - SGX_INSTANCE_ID=${RAIKO_SN_INSTANCE_ID:-}
+      - ETHEREUM_RPC=${RAIKO_SN_ETHEREUM_RPC:-}
+      - ETHEREUM_BEACON_RPC=${RAIKO_SN_ETHEREUM_BEACON_RPC:-}
+      - HOLESKY_RPC=${RAIKO_SN_HOLESKY_RPC:-}
+      - HOLESKY_BEACON_RPC=${RAIKO_SN_HOLESKY_BEACON_RPC:-}
+      - TAIKO_A7_RPC=${RAIKO_SN_TAIKO_A7_RPC:-}
+      - TAIKO_MAINNET_RPC=${RAIKO_SN_TAIKO_MAINNET_RPC:-}
+      - L1_NETWORK=${RAIKO_SN_L1_NETWORK:-}
+      - NETWORK=${RAIKO_SN_NETWORK:-}
     depends_on:
       - pccs
 
@@ -33,7 +34,7 @@ services:
     build:
       context: src/raiko
       dockerfile: Dockerfile.pccs
-    image: ${SRN_PCCS_IMAGE:-pccs}:${SRN_IMAGES_TAG:-latest}
+    image: ${RAIKO_SN_PCCS_IMAGE:-pccs}:${RAIKO_SN_PCCS_IMAGE_TAG:-latest}
     restart: unless-stopped
     volumes:
       - ./data/pccs/default.json:/opt/intel/pccs/config/default.json
@@ -47,7 +48,7 @@ services:
       - ./src/raiko/docker/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus:/prometheus
     ports:
-      - "${SRN_PROMETHEUS_PORT:-9090}:9090"
+      - "${RAIKO_SN_PROMETHEUS_PORT:-9090}:9090"
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     profiles:
@@ -57,7 +58,7 @@ services:
     image: grafana/grafana:latest
     restart: unless-stopped
     ports:
-      - "${SRN_GRAFANA_PORT:-3000}:3000"
+      - "${RAIKO_SN_GRAFANA_PORT:-3000}:3000"
     volumes:
       - ./data/grafana/provisioning:/etc/grafana/provisioning
       - grafana:/var/lib/grafana
@@ -65,5 +66,5 @@ services:
       - metrics
 
 volumes:
-  grafana:
-  prometheus:
+  grafana: {}
+  prometheus: {}

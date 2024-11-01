@@ -47,26 +47,26 @@ PRIVATE_KEY= \
 |-------------------------|----------|------------------------------|------------------------------------------------------------------|
 | INTEL_API_KEY           | No       |                              |                                                                  |
 | PRIVATE_KEY             | No       |                              |                                                                  |
-| SRN_RAIKO_IMAGE         | Yes      |                              | `raiko`                                                          |
-| SRN_PCCS_IMAGE          | Yes      |                              | `pccs`                                                           |
-| SRN_IMAGES_TAG          | Yes      |                              | `latest`                                                         |
-| SRN_RAIKO_PORT          | Yes      |                              | `8080`                                                           |
+| RAIKO_SN_RAIKO_IMAGE         | Yes      |                              | `raiko`                                                          |
+| RAIKO_SN_PCCS_IMAGE          | Yes      |                              | `pccs`                                                           |
+| RAIKO_SN_IMAGES_TAG          | Yes      |                              | `latest`                                                         |
+| RAIKO_SN_RAIKO_PORT          | Yes      |                              | `8080`                                                           |
 | SPECIFY_NETWORK         | Yes      | `Y` / `N`                    | `Y`                                                              |
-| SRN_L1_NETWORK          | Yes      | `holesky` / `ethereum`       | `holesky`                                                        |
-| SRN_NETWORK             | Yes      | `taiko_a7` / `taiko_mainnet` | `taiko_a7`                                                       |
-| SRN_ETHEREUM_RPC        | Yes      |                              |                                                                  |
-| SRN_ETHEREUM_BEACON_RPC | Yes      |                              |                                                                  |
-| SRN_HOLESKY_RPC         | Yes      |                              |                                                                  |
-| SRN_HOLESKY_BEACON_RPC  | Yes      |                              |                                                                  |
-| SRN_TAIKO_MAINNET_RPC   | Yes      |                              |                                                                  |
-| SRN_TAIKO_A7_RPC        | Yes      |                              |                                                                  |
+| RAIKO_SN_L1_NETWORK          | Yes      | `holesky` / `ethereum`       | `holesky`                                                        |
+| RAIKO_SN_NETWORK             | Yes      | `taiko_a7` / `taiko_mainnet` | `taiko_a7`                                                       |
+| RAIKO_SN_ETHEREUM_RPC        | Yes      |                              |                                                                  |
+| RAIKO_SN_ETHEREUM_BEACON_RPC | Yes      |                              |                                                                  |
+| RAIKO_SN_HOLESKY_RPC         | Yes      |                              |                                                                  |
+| RAIKO_SN_HOLESKY_BEACON_RPC  | Yes      |                              |                                                                  |
+| RAIKO_SN_TAIKO_MAINNET_RPC   | Yes      |                              |                                                                  |
+| RAIKO_SN_TAIKO_A7_RPC        | Yes      |                              |                                                                  |
 | COLLECT_METRICS         | Yes      | `Y` / `N`                    | `Y`                                                              |
-| SRN_PROMETHEUS_PORT     | Yes      |                              | `9090`                                                           |
-| SRN_GRAFANA_PORT        | Yes      |                              | `3000`                                                           |
+| RAIKO_SN_PROMETHEUS_PORT     | Yes      |                              | `9090`                                                           |
+| RAIKO_SN_GRAFANA_PORT        | Yes      |                              | `3000`                                                           |
 | REGISTER_AGAIN          | Yes      | `Y` / `N`                    | `N`                                                              |
 | BUILD_AGAIN             | Yes      | `Y` / `N`                    | `N`                                                              |
 | PULL_AGAIN              | Yes      | `Y` / `N`                    | `N`                                                              |
-| L1_RPC                  | Yes      |                              | `https://rpc.ankr.com/eth[_holesky]` (depends on SRN_L1_NETWORK) |
+| L1_RPC                  | Yes      |                              | `https://rpc.ankr.com/eth[_holesky]` (depends on RAIKO_SN_L1_NETWORK) |
 | GAS_PRICE               | Yes      |                              |                                                                  |
 
 </details>
