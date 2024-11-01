@@ -28,4 +28,4 @@ fi
 read -r -e -p "Proof type [native, sp1, sgx, risc0, risc0-bonsai]: " -i "${PROOF_TYPE:-sgx}" PROOF_TYPE
 read -r -e -p "Block number: " -i "${RANGE_START:-${block_number}}" RANGE_START
 
-source ./src/raiko/scripts/prove-block.sh "${RAIKO_SN_NETWORK}" "${PROOF_TYPE}" "${RANGE_START}"
+source ./src/raiko/script/prove-block.sh "${RAIKO_SN_NETWORK}" "${PROOF_TYPE}" "${RANGE_START}"
