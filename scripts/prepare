@@ -1,6 +1,10 @@
 #!/bin/bash
 
 if ! command -v jq >/dev/null 2>&1; then
+  sudo apt update && sudo apt install -y jq
+fi
+
+if ! command -v PCKIDRetrievalTool >/dev/null 2>&1; then
   ubuntu_version=$(lsb_release -rs)
   if [[ $(echo "$ubuntu_version >= 22.04" | bc) -eq 1 ]]; then
     wget -qO- https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo tee /etc/apt/keyrings/intel-sgx-keyring.asc >/dev/null
@@ -10,7 +14,7 @@ if ! command -v jq >/dev/null 2>&1; then
     exit 1
   fi
 
-  sudo apt update && sudo apt install -y sgx-pck-id-retrieval-tool libsgx-dcap-default-qpl jq
+  sudo apt update && sudo apt install -y sgx-pck-id-retrieval-tool libsgx-dcap-default-qpl
 fi
 
 if ! command -v node >/dev/null 2>&1; then
