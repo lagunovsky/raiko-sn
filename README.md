@@ -17,7 +17,7 @@ primary API key and a secondary API key.
 #### 2. Clone the repository
 
 ```bash
-git clone https://github.com/lagunovsky/simple-raiko-node
+git clone https://github.com/lagunovsky/raiko-sn.git
 ```
 
 #### 3. Run the setup script
