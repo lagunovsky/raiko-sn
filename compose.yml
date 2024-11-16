@@ -1,5 +1,12 @@
+x-logging: &logging
+  logging:
+    options:
+      max-size: 10m
+      max-file: "3"
+
 services:
   raiko:
+    <<: *logging
     build:
       context: src/raiko
       dockerfile: Dockerfile
@@ -31,6 +38,7 @@ services:
       - pccs
 
   pccs:
+    <<: *logging
     build:
       context: src/raiko
       dockerfile: Dockerfile.pccs
@@ -42,6 +50,7 @@ services:
       - ./data/pccs/private.pem:/opt/intel/pccs/ssl_key/private.pem
 
   prometheus:
+    <<: *logging
     image: prom/prometheus:latest
     restart: unless-stopped
     volumes:
@@ -55,6 +64,7 @@ services:
       - metrics
 
   grafana:
+    <<: *logging
     image: grafana/grafana:latest
     restart: unless-stopped
     ports:
