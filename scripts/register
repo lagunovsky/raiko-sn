@@ -23,9 +23,13 @@ if [[ -f "$priv_key_path" ]]; then
   fi
 
   docker compose down
+
   sudo mv "${priv_key_path}" "${priv_key_path}.${timestamp}"
   sudo mv "${bootstrap_path}" "${bootstrap_path}.${timestamp}"
+
   sed -i "s/^RAIKO_SN_INSTANCE_ID=/RAIKO_SN_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_INSTANCE_ID=/g" ".env"
+  sed -i "s/^RAIKO_SN_ONTAKE_INSTANCE_ID=/RAIKO_SN_ONTAKE_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_ONTAKE_INSTANCE_ID=/g" ".env"
+  sed -i "s/^RAIKO_SN_PACAYA_INSTANCE_ID=/RAIKO_SN_PACAYA_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_PACAYA_INSTANCE_ID=/g" ".env"
 
   if [[ "$RAIKO_SN_RAIKO_IMAGE" == "raiko" ]]; then
     ask "Do you want to rebuild images? [Y/N]" BUILD_AGAIN "N"
@@ -38,6 +42,11 @@ if [[ -f "$priv_key_path" ]]; then
       docker compose pull
     fi
   fi
+fi
+
+if [ "$RAIKO_SN_L1_NETWORK" != "ethereum" ]; then
+  echo "🚨 WARNING: Holesky is not supported yet. Please use official raiko guide to register and manage SGX instance."
+  exit 1
 fi
 
 docker compose up -d pccs && sleep 4
@@ -94,8 +103,8 @@ if [[ -z $SGX_INSTANCE_ID ]]; then
   exit 1
 fi
 
-sed -i "s/^RAIKO_SN_INSTANCE_ID=/RAIKO_SN_INSTANCE_ID=$SGX_INSTANCE_ID/g" ".env"
-echo "✅ Registered SGX instance with ID: $SGX_INSTANCE_ID"
+sed -i "s/^RAIKO_SN_ONTAKE_INSTANCE_ID=/RAIKO_SN_ONTAKE_INSTANCE_ID=$SGX_INSTANCE_ID/g" ".env"
+echo "✅ Registered SGX instance (ONTAKE) with ID: $SGX_INSTANCE_ID"
 
 docker compose down && docker compose up -d
 
