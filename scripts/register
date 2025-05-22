@@ -84,7 +84,7 @@ export ETH_GAS_PRICE
 
 for PROVER_IMPL in "geth" "reth"; do
   export PROVER_IMPL
-  sgxreth_quote=$(jq -r '.quote' <"${bootstrap_path[$PROVER_IMPL]}")
+  sgxreth_quote=$(jq -r '.quote' <"$workdir/${bootstrap_path[$PROVER_IMPL]}")
   export V3_QUOTE_BYTES=${sgxreth_quote}
 
   set +e
