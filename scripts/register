@@ -9,7 +9,10 @@ timestamp=$(date +%s)
 
 workdir=$(pwd)
 priv_key_path="data/raiko/secrets/priv.key"
-bootstrap_path="data/raiko/config/bootstrap.json"
+
+declare -A bootstrap_path
+bootstrap_path["reth"]="data/raiko/config/bootstrap.json"
+bootstrap_path["geth"]="data/raiko/config/bootstrap.gaiko.json"
 
 mkdir -p data/raiko/config
 mkdir -p data/raiko/secrets
@@ -25,11 +28,11 @@ if [[ -f "$priv_key_path" ]]; then
   docker compose down
 
   sudo mv "${priv_key_path}" "${priv_key_path}.${timestamp}"
-  sudo mv "${bootstrap_path}" "${bootstrap_path}.${timestamp}"
+  sudo mv "${bootstrap_path["reth"]}" "${bootstrap_path["reth"]}.${timestamp}"
+  sudo mv "${bootstrap_path["geth"]}" "${bootstrap_path["geth"]}.${timestamp}"
 
-  sed -i "s/^RAIKO_SN_INSTANCE_ID=/RAIKO_SN_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_INSTANCE_ID=/g" ".env"
-  sed -i "s/^RAIKO_SN_ONTAKE_INSTANCE_ID=/RAIKO_SN_ONTAKE_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_ONTAKE_INSTANCE_ID=/g" ".env"
-  sed -i "s/^RAIKO_SN_PACAYA_INSTANCE_ID=/RAIKO_SN_PACAYA_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_PACAYA_INSTANCE_ID=/g" ".env"
+  sed -i "s/^RAIKO_SN_RETH_INSTANCE_ID=/RAIKO_SN_RETH_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_RETH_INSTANCE_ID=/g" ".env"
+  sed -i "s/^RAIKO_SN_GETH_INSTANCE_ID=/RAIKO_SN_GETH_INSTANCE_ID=\n# ${timestamp} RAIKO_SN_GETH_INSTANCE_ID=/g" ".env"
 
   if [[ "$RAIKO_SN_RAIKO_IMAGE" == "raiko" ]]; then
     ask "Do you want to rebuild images? [Y/N]" BUILD_AGAIN "N"
@@ -44,33 +47,8 @@ if [[ -f "$priv_key_path" ]]; then
   fi
 fi
 
-if [ "$RAIKO_SN_L1_NETWORK" != "ethereum" ]; then
-  echo "🚨 WARNING: Holesky is not supported yet. Please use official raiko guide to register and manage SGX instance."
-  exit 1
-fi
-
-docker compose up -d pccs && sleep 4
+docker compose up -d pccs && sleep 8
 docker compose run --rm raiko --init
-
-quote=$(jq -r '.quote' <"$bootstrap_path")
-export V3_QUOTE_BYTES=${quote}
-
-ask "Provide your private key:" PRIVATE_KEY
-
-ask "Enter the gas price in wei, empty for auto-detect:" GAS_PRICE
-if [[ -n $GAS_PRICE ]]; then
-  ETH_GAS_PRICE=$GAS_PRICE
-fi
-
-declare -A L1_RPC_DEFAULTS
-L1_RPC_DEFAULTS["holesky"]=${RAIKO_SN_HOLESKY_RPC:-"https://ethereum-holesky.blockpi.network/v1/rpc/public"}
-L1_RPC_DEFAULTS["ethereum"]=${RAIKO_SN_ETHEREUM_RPC:-"https://ethereum.blockpi.network/v1/rpc/public"}
-
-if [[ -z $RAIKO_SN_ETHEREUM_RPC && -z $RAIKO_SN_HOLESKY_RPC ]]; then
-  ask "Provide L1 RPC url: " L1_RPC "${L1_RPC_DEFAULTS[${RAIKO_SN_L1_NETWORK}]}"
-else
-  L1_RPC=${L1_RPC_DEFAULTS[${RAIKO_SN_L1_NETWORK}]}
-fi
 
 mono_deps_path="$workdir/.mono-deps"
 current_rev=$(git rev-parse --short HEAD:src/taiko-mono)
@@ -82,29 +60,57 @@ if [[ "$current_rev" != "$installed_rev" ]]; then
   echo "${current_rev}" >"$mono_deps_path"
 fi
 
+ask "Enter the gas price in wei, empty for auto-detect:" GAS_PRICE
+if [[ -n $GAS_PRICE ]]; then
+  ETH_GAS_PRICE=$GAS_PRICE
+fi
+
+declare -A l1_rpc_defaults
+l1_rpc_defaults["holesky"]=${RAIKO_SN_HOLESKY_RPC:-"https://ethereum-holesky-rpc.publicnode.com"}
+l1_rpc_defaults["ethereum"]=${RAIKO_SN_ETHEREUM_RPC:-"https://ethereum-rpc.publicnode.com"}
+
+if [[ -z $RAIKO_SN_ETHEREUM_RPC && -z $RAIKO_SN_HOLESKY_RPC ]]; then
+  ask "Provide L1 RPC url: " L1_RPC "${l1_rpc_defaults[${RAIKO_SN_L1_NETWORK}]}"
+else
+  L1_RPC=${l1_rpc_defaults[${RAIKO_SN_L1_NETWORK}]}
+fi
+
+ask "Provide your private key:" PRIVATE_KEY
+
 export RAIKO_SN_L1_NETWORK
 export L1_RPC
 export PRIVATE_KEY
 export ETH_GAS_PRICE
 
-set +e
-register_sgx_path="$workdir/scripts/helpers/register-sgx"
-registration_process=$($register_sgx_path 2>&1 | tee /dev/tty)
+for PROVER_IMPL in "geth" "reth"; do
+  export PROVER_IMPL
+  sgxreth_quote=$(jq -r '.quote' <"${bootstrap_path[$PROVER_IMPL]}")
+  export V3_QUOTE_BYTES=${sgxreth_quote}
+
+  set +e
+  register_sgx_path="$workdir/scripts/helpers/register-sgx"
+  registration_process=$($register_sgx_path 2>&1 | tee /dev/tty)
+  echo "$registration_process" >"$workdir/data/logs/raiko/registration.$PROVER_IMPL.$timestamp.log"
+done
+
 unset PRIVATE_KEY
-echo "$registration_process" >"$workdir/data/logs/raiko/registration-$timestamp.log"
 cd "$workdir"
 
-SGX_INSTANCE_ID=$(node ./scripts/helpers/parse-forge-output.mjs "$workdir/data/logs/raiko/registration-$timestamp.log")
-if [[ -z $SGX_INSTANCE_ID ]]; then
-  echo "🚫 Failed to register SGX instance"
-  echo "If it's wrong and registration was successful, you can add your instance ID to .env file manually (variable RAIKO_SN_INSTANCE_ID) and start raiko by running 'docker compose up -d'"
-  echo "Registration logs are saved at: $workdir/data/logs/raiko/registration-$timestamp.log"
-  docker compose down
+success_parse_forge_output=true
+for PROVER_IMPL in "geth" "reth"; do
+  INSTANCE_ID=$(node ./scripts/helpers/parse-forge-output.mjs "$workdir/data/logs/raiko/registration.$PROVER_IMPL.$timestamp.log")
+  if [[ -z $INSTANCE_ID ]]; then
+    echo "🚫 Failed to register SGX ${PROVER_IMPL^^} instance. Registration logs are saved at: $workdir/data/logs/raiko/registration.$PROVER_IMPL.$timestamp.log"
+    success_parse_forge_output=false
+  else
+    sed -i "s/^RAIKO_SN_${PROVER_IMPL^^}_INSTANCE_ID=/RAIKO_SN_${PROVER_IMPL^^}_INSTANCE_ID=$INSTANCE_ID/g" ".env"
+    echo "✅ Registered SGX ${PROVER_IMPL^^} instance with ID: $INSTANCE_ID"
+  fi
+done
+
+if [[ $success_parse_forge_output == false ]]; then
   exit 1
 fi
-
-sed -i "s/^RAIKO_SN_ONTAKE_INSTANCE_ID=/RAIKO_SN_ONTAKE_INSTANCE_ID=$SGX_INSTANCE_ID/g" ".env"
-echo "✅ Registered SGX instance (ONTAKE) with ID: $SGX_INSTANCE_ID"
 
 docker compose down && docker compose up -d
 

@@ -21,7 +21,7 @@ if [[ ! -f ".env" ]]; then
   }
 
   specify_env_variable "Specify the Raiko docker image name:" RAIKO_SN_RAIKO_IMAGE "us-docker.pkg.dev/evmchain/images/raiko"
-  specify_env_variable "Specify the Raiko docker image tag:" RAIKO_SN_RAIKO_IMAGE_TAG "1.7.3-edmm"
+  specify_env_variable "Specify the Raiko docker image tag:" RAIKO_SN_RAIKO_IMAGE_TAG "1.8.0-edmm"
 
   specify_env_variable "Specify the PCCS docker image name:" RAIKO_SN_PCCS_IMAGE "us-docker.pkg.dev/evmchain/images/pccs"
   specify_env_variable "Specify the PCCS docker image tag:" RAIKO_SN_PCCS_IMAGE_TAG "latest"
