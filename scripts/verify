@@ -1,32 +1,9 @@
 #!/bin/bash
 
+set -o allexport
 source .env
+set +o allexport
 
-block_number=99999
+unset PRIVATE_KEY
 
-function get_last_block_number() {
-  block_number_hex=$(curl "$1" -s -X POST -H "Content-Type: application/json" --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}' | jq -r ".result")
-  block_number=$((block_number_hex))
-}
-
-if [ -z "$RAIKO_SN_NETWORK" ]; then
-  read -r -e -p "Chain [taiko_mainnet, taiko_a7]: " -i "${CHAIN:-taiko_a7}" RAIKO_SN_NETWORK
-fi
-
-if [ "$RAIKO_SN_NETWORK" == "taiko_a7" ]; then
-  if [ -z "$RAIKO_SN_TAIKO_A7_RPC" ]; then
-    read -r -e -p "Specify the Taiko A7 RPC endpoint: " RAIKO_SN_TAIKO_A7_RPC
-  fi
-  get_last_block_number "${RAIKO_SN_TAIKO_A7_RPC}"
-elif [ "$RAIKO_SN_NETWORK" == "taiko_mainnet" ]; then
-  if [ -z "$RAIKO_SN_TAIKO_MAINNET_RPC" ]; then
-    read -r -e -p "Specify the Taiko Mainnet RPC endpoint: " RAIKO_SN_TAIKO_MAINNET_RPC
-  fi
-  get_last_block_number "${RAIKO_SN_TAIKO_MAINNET_RPC}"
-fi
-
-read -r -e -p "Proof type [native, sp1, sgx, risc0, risc0-bonsai]: " -i "${PROOF_TYPE:-sgx}" PROOF_TYPE
-read -r -e -p "Block number: " -i "${RANGE_START:-${block_number}}" RANGE_START
-
-export RAIKO_SN_RAIKO_PORT
-source ./scripts/override/prove-block.sh "${RAIKO_SN_NETWORK}" "${PROOF_TYPE}" "${RANGE_START}"
+node ./scripts/helpers/prove-batch.mjs
